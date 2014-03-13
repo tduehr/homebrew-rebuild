@@ -10,7 +10,7 @@ def rebuild
   @mode = OpenStruct.new(
     :all?        => ARGV.include?('--installed'),
     :recursive?  => (ARGV.include?('--recurse') && !ARGV.include?('--installed')),
-    :fail?       => !ARGV.include?('--fail')
+    :fail?       => ARGV.include?('--fail')
   )
   @clean_ARGV = ARGV.clone.delete_if{|x| remarr.include? x}
 
@@ -45,9 +45,8 @@ def rebuild
     begin
       reinstall f
     rescue => e
-      # raise if @mode.fail?
-      ignore_interrupts { restore_backup(keg, formula) }
-      onoe "#{f} failed to rebuild"
+      raise if @mode.fail?
+      opoo "#{f} failed to rebuild"
       failed[f] = e
     end
   end
