@@ -14,6 +14,9 @@ def rebuild
   )
   @clean_ARGV = ARGV.clone.delete_if{|x| remarr.include? x}
 
+  @dep_map = Hash.new{|h,k| h[k] = k.deps}
+  @req_map = Hash.new{|h,k| h[k] = k.requirements}
+  @rebuilt = []
   if @mode.all?
     @formulae = Formula.installed
   else
@@ -25,15 +28,16 @@ def rebuild
     odie "No formula specified"
   end
 
-  @dep_map = Hash.new{|h,k| h[k] = k.deps}
-  @req_map = Hash.new{|h,k| h[k] = k.requirements}
-  @rebuilt = []
   list = []
-  @formulae.each do |formula|
-    list |= rebuild_list formula, @mode.recursive?, list
+  if @mode.all?
+    list = @formulae
+  else
+    @formulae.each do |formula|
+      list |= rebuild_list formula, @mode.recursive?, list
+    end
   end
   list = sort_deps list
-  ohai "Rebuilding:\n#{list}"
+  puts "Rebuilding:\n#{list.join(', ')}"
   ohai 'Stopping on failures' if @mode.fail?
 
   failed = {}
@@ -41,7 +45,9 @@ def rebuild
     begin
       reinstall f
     rescue => e
-      raise if @mode.fail?
+      # raise if @mode.fail?
+      ignore_interrupts { restore_backup(keg, formula) }
+      onoe "#{f} failed to rebuild"
       failed[f] = e
     end
   end

@@ -3,7 +3,7 @@ require 'formula'
 class BrewRebuild < Formula
   homepage 'http://github.com/tduehr/homebrew-rebuid'
   url 'git://github.com/tduehr/homebrew-rebuild.git'
-  version '0.5.0'
+  version '0.5.2'
 
   skip_clean 'bin'
 
