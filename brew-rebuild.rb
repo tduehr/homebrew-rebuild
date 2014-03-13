@@ -6,10 +6,11 @@ end
 
 def rebuild
   named = ARGV.named
-  remarr = named + %w{--installed --recurse}
+  remarr = named + %w{--installed --recurse --fail}
   @mode = OpenStruct.new(
     :all?        => ARGV.include?('--installed'),
-    :recursive?  => (ARGV.include?('--recurse') && !ARGV.include?('--installed'))
+    :recursive?  => (ARGV.include?('--recurse') && !ARGV.include?('--installed')),
+    :fail?       => !ARGV.include?('--fail')
   )
   @clean_ARGV = ARGV.clone.delete_if{|x| remarr.include? x}
 
@@ -32,8 +33,24 @@ def rebuild
     list |= rebuild_list formula, @mode.recursive?, list
   end
   list = sort_deps list
+  ohai "Rebuilding:\n#{list}"
+  ohai 'Stopping on failures' if @mode.fail?
+
+  failed = {}
   list.each do |f|
-    reinstall f
+    begin
+      reinstall f
+    rescue => e
+      raise if @mode.fail?
+      failed[f] = e
+    end
+  end
+
+  unless failed.empty?
+    puts "Failures - debug with brew reinstall"
+    failed.each do |f,e|
+      puts "#{f}: #{e}"
+    end
   end
 end
 
