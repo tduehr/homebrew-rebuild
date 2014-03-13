@@ -1,7 +1,11 @@
-homebrew-rebuild
-================
+# brew-rebuild - Rebuild installed formulae
 
-Usage:
+## Why?
+
+Because the various one liners I've used don't really do this well. So here's an [external
+command](https://github.com/Homebrew/homebrew/wiki/External-Commands) for [Homebrew](https://github.com/Homebrew/homebrew).
+
+## Usage
 
 ````
 brew rebuild --installed
@@ -13,3 +17,11 @@ Rebuilds all formulae with the given formula as a dependency. Unless `--recursiv
 
 * `--installed` - rebuild all installed formulae. Useful for OS and compoler upgrades.
 * `--recursive` - rebuild all formulae with a recursive dependency
+
+## Installation
+
+    brew tap tduehr/homebrew-rebuild && brew install brew-rebuild
+
+## Contributing
+
+I'm always happy to review pull requests but I'm not sure there's anything to add or change.
